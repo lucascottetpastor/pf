@@ -6,7 +6,7 @@ import pdfplumber
 class PDFReaderApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("LEITURA E BUSCA EM PDFs")
+        self.root.title("PDF Reader and Search")
         
         self.label = tk.Label()
         self.directory = tk.StringVar()
@@ -16,16 +16,16 @@ class PDFReaderApp:
         self.create_widgets()
     
     def create_widgets(self):
-        tk.Label(self.root, text="Diretório dos PDF").grid(row=0, column=0, padx=10, pady=10)
+        tk.Label(self.root, text="PDF Directory:").grid(row=0, column=0, padx=10, pady=10)
         tk.Entry(self.root, textvariable=self.directory, width=50).grid(row=0, column=1, padx=10, pady=10)
-        tk.Button(self.root, text="Procurar", command=self.browse_directory).grid(row=0, column=2, padx=10, pady=10)
+        tk.Button(self.root, text="Browse", command=self.browse_directory).grid(row=0, column=2, padx=10, pady=10)
         
-        tk.Label(self.root, text="Buscar Palavra:").grid(row=2, column=0, padx=10, pady=10)
+        tk.Label(self.root, text="Search Word:").grid(row=2, column=0, padx=10, pady=10)
         tk.Entry(self.root, textvariable=self.search_word, width=50).grid(row=2, column=1, padx=10, pady=10)
         
-        tk.Button(self.root, text="Ler PDFs", command=self.read_pdfs).grid(row=1, column=0, columnspan=3, pady=20)
+        tk.Button(self.root, text="Read PDFs", command=self.read_pdfs).grid(row=1, column=0, columnspan=3, pady=20)
         self.label.grid(row=1, column=2, padx=10, pady=10)
-        tk.Button(self.root, text="Buscar", command=self.buscar_palavra).grid(row=3, column=0, columnspan=3, pady=10)
+        tk.Button(self.root, text="Search", command=self.buscar_palavra).grid(row=3, column=0, columnspan=3, pady=10)
 
         tk.Label(root, text="Saída:").grid(row=3, column=0, padx=10, pady=10)
         self.output_text = tk.Text(root, width=100, height=40)
@@ -53,7 +53,7 @@ class PDFReaderApp:
                     for page in pdf.pages:
                         text = page.extract_text()
                         if text:  # Verifica se a extração de texto não é None
-                            textos.append(text)
+                            textos.append(f'##%##{text}\n')
             except Exception as ex:
                 print(f"Erro ao ler o PDF {arquivo}: {ex}")
         return '\n'.join(textos)
@@ -61,19 +61,19 @@ class PDFReaderApp:
     def read_pdfs(self):
         diretorio = self.directory.get()
         if not diretorio:
-            messagebox.showerror("Erro", "Selecione um diretório.")
+            messagebox.showerror("Error", "Please select a directory")
             return
         
         lista_de_arquivos = self.listar_caminhos_completos(diretorio)
         if not lista_de_arquivos:
-            messagebox.showerror("Erro", "Nenhum PDF encontrado.")
+            messagebox.showerror("Error", "No PDF files found in the selected directory")
             return
         
         textos = self.ler_pdf(lista_de_arquivos)
         with open('tudo.txt', 'w', encoding='utf-8') as arq:
-            arq.write(f'##%##{textos}\n')
+            arq.write(textos)
         
-        messagebox.showinfo("Sucesso!", "Todos PDF lidos e salvos.")
+        messagebox.showinfo("Success", "PDF files read and content saved to tudo.txt")
     
     def buscar_palavra(self):
         try:
@@ -83,6 +83,7 @@ class PDFReaderApp:
             conteudo = conteudo.split('##%##')
             resultados = []
             for arquivo in conteudo:
+                print(conteudo)
                 if palavra.lower() in arquivo.lower():
                     lista = arquivo.split('\n')
                     for e, linha in enumerate(lista):
@@ -94,7 +95,7 @@ class PDFReaderApp:
             self.output_text.delete(1.0, tk.END)
             self.output_text.insert(tk.END, '\n\n'.join(resultados))
         except: 
-            messagebox.showerror("Erro", "Leia os pdfs antes de procurar a palavra")
+            messagebox.showerror("Error", "Leia os pdfs antes de procurar a palavra")
 
 
 if __name__ == "__main__":
